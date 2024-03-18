@@ -82,7 +82,7 @@ export default class {
         } catch (e) {
             console.error(e, e.stack);
         }
-        return null;
+        return [];
     }
 
     async markSent(owner: string, email: string): Promise<void> {

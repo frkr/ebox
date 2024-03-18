@@ -14,7 +14,7 @@ queue = "ebox"
 binding = "ebox"
 
 [triggers]
-crons = ["* * 13-16 * 1-5"]
+crons = ["* * 7-14 * 1-5"]
 
 [vars]
 #DKIM_PRIVATE_KEY
