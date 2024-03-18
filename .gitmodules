@@ -1,0 +1,3 @@
+[submodule "src/lib/util-js"]
+	path = src/lib/util-js
+	url = https://github.com/frkr/util-js.git

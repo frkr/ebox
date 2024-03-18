@@ -1,0 +1,5 @@
+POST https://ebox.mundial.workers.dev/malaaao/
+Content-Type: application/json
+Accept: application/json
+
+{}
