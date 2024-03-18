@@ -61,27 +61,32 @@ export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
                         segm: !segm ? '' : segm.replaceAll(/[^a-zA-Z0-9]/g, ' ')
                     };
 
-                    let boxChoices: string[] = [box.substring(0, 3)];
+                    let tmp = box.substring(0, 3);
+                    let boxChoices: string[] = [tmp];
                     if (allBoxes.filter(p => p === box).length === 0) {
+                        cabloco.box = tmp;
                         await new boxesService(env).insert(cabloco);
-                        allBoxes.push(box);
+                        allBoxes.push(tmp);
                     } else {
 
-                        let messages = [
-                            {
-                                role: "user",
-                                content: `Crie uma lista com ate 10 itens com um tamanho de 3 caracteres usando essas letras: ${box}`,
-                            },
-                        ];
-                        let response: any = await ai.run("@cf/meta/llama-2-7b-chat-int8", {messages});
-                        boxChoices = response.response.split(',').map(p => p.toLowerCase().replaceAll(/[^a-z]/g, '').trim()).map(g => g.length > 3 ? g.substring(0, 3) : g);
-                        boxChoices = boxChoices.concat([box + 'a', box + 'b', box + 'c', box + 'd', box + 'e', box + 'f', box + 'g', box + 'h', box + 'i', box + 'j']);
+                        let boxChoices = [];
+                        for (let i = 0; i < 10; i++) {
+                            tmp = (Math.random() + 1).toString(36).substring(8);
+                            boxChoices.push(tmp);
+                        }
+
+                        // boxChoices = response.response.split(',').map(p => p.toLowerCase().replaceAll(/[^a-z]/g, '').trim()).map(g => g.length > 3 ? g.substring(0, 3) : g);
+
+                        boxChoices = boxChoices.concat([tmp + 'a', tmp + 'b', tmp + 'c', tmp + 'd', tmp + 'e', tmp + 'f', tmp + 'g', tmp + 'h', tmp + 'i', tmp + 'j']);
+
+                        boxChoices.map(p => p.length > 3 ? p.substring(0, 3) : p);
 
                         for (let p of boxChoices) {
                             if (allBoxes.filter(p => p === box).length === 0) {
                                 cabloco.box = p;
                                 await new boxesService(env).insert(cabloco);
                                 allBoxes.push(p);
+                                break;
                             }
                         }
                     }
