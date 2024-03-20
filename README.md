@@ -94,3 +94,9 @@ v=mc1 cfid=mundial.workers.dev
 
 # Roadmap
 - Caixa para Resumo
+```typescript
+import {Ai} from "@cloudflare/ai";
+
+const ai = new Ai(env.AI);
+
+```

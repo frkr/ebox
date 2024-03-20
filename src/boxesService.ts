@@ -40,13 +40,13 @@ export default class {
         return [];
     }
 
-    async whois(boxOwner: string, box: string): Promise<boxes[]> {
+    async whois(boxOwner: string, email: string, box: string = ''): Promise<boxes[]> {
         try {
 
             const {results}: Record<string, any> = await this.env.DB.prepare(
-                "SELECT * FROM boxes WHERE tag = ? AND box = ?"
+                "SELECT * FROM boxes WHERE tag = ? AND (email = ? OR box = ?)"
             )
-                .bind(boxOwner, box)
+                .bind(boxOwner, email, box)
                 .all()
 
             if (results) {
@@ -96,20 +96,20 @@ export default class {
     //     return null;
     // }
 
-    // async insert2(abox: boxes): Promise<void> {
-    //     try {
-    //
-    //         await this.env.DB.prepare(
-    //             "INSERT INTO boxes (box,owner,name,tag,tag2,corpName,email,segm,sent) VALUES (?,?,?,?,?,?,?,?,0)"
-    //         )
-    //             .bind(abox.box, abox.owner, abox.name, abox.tag, abox.tag2, abox.corpName, abox.email, abox.segm)
-    //             .run()
-    //
-    //
-    //     } catch (e) {
-    //         console.error(e, e.stack);
-    //     }
-    // }
+    async insertEmail(corpName: string, email: string): Promise<void> {
+        try {
+
+            await this.env.DB.prepare(
+                "INSERT INTO emails (corpName,email,sent) VALUES (?,?,0)"
+            )
+                .bind(corpName, email)
+                .run()
+
+
+        } catch (e) {
+            console.error(e, e.stack);
+        }
+    }
 
     async insertUntil(abox: owners, fromName: string, email: string): Promise<boxes> {
         try {

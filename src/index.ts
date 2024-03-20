@@ -111,7 +111,7 @@ export default {
         //endregion
 
         //region Recebimento
-        let persona = await new boxesService(env).whois(boxOwner, box);
+        let persona = await new boxesService(env).whois(boxOwner, message.from, box);
         if (persona.length === 0) {
             let ownerBox = await new boxesService(env).whoisBox(boxOwner);
             if (ownerBox) {
