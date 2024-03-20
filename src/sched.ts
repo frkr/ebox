@@ -1,17 +1,14 @@
 import boxesService from "./boxesService";
 import {sendemail} from "./sendemail";
 
-/**
- *
- */
 export async function sched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
     const all = await new boxesService(env).next(100);
 
     for (let cabloco of all) {
         await sendemail(env, {
-            nameFrom: cabloco.name,
-            from: `${cabloco.tag}.${cabloco.box}`,
+            nameFrom: name,
+            from: box,
             nameTo: cabloco.corpName,
             to: cabloco.email,
             subject: "Vaga - Curriculo",
@@ -20,6 +17,6 @@ export async function sched(event: ScheduledController, env: Env, ctx: Execution
             template: true,
         });
 
-        await new boxesService(env).markSent(cabloco.owner, cabloco.email);
+        await new boxesService(env).markSent(cabloco.email);
     }
 }

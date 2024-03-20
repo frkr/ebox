@@ -9,52 +9,73 @@ import {sched} from "./sched";
 
 export default {
 
+    fetch: bulk,
+    queue: mail,
+    scheduled: sched,
+
     /**
      * Cloudflare Worker email handler
      */
     async email(message: ForwardableEmailMessage, env: Env, ctx: any) {
 
+        //region Inicio
         const to = message.to.split('@')[0];
-        const box = to.split('.')[1];
 
-        if (
+        // TODO postman é problema. Tem q avisar
+        if (message.from.startsWith('postmaster@') ||
+            message.to.startsWith('postmaster@') ||
             to === 'no-reply' ||
             to === 'no_reply'
         ) {
-            message.setReject(`421 4.7.28 Mailbox does not exist. https://www.${env.DKIM_DOMAIN}/ `);
-            // message.setReject(`550 5.1.1 Mailbox does not exist. ${env.DKIM_DOMAIN} `);
-            return;
-        }
-        if (message.from.startsWith('postmaster@') || message.to.startsWith('postmaster@')) {
             return;
         }
 
-        let from = await new boxesService(env).owner(box, message.from);
+        //---message.setReject(`421 4.7.28 Mailbox does not exist. https://www.${env.DKIM_DOMAIN}/ `);
+        //+++message.setReject(`550 5.1.1 Mailbox does not exist. ${env.DKIM_DOMAIN} `);
+
+        const boxOwner = to.split('.')[0];
+
+        let fromName = '';
+        try {
+            fromName = message.headers.get("from");
+        } catch (e) {
+        }
+        if (isEmpty(fromName)) {
+            try {
+                fromName = message.headers.get("From");
+            } catch (e) {
+            }
+        }
+        if (!isEmpty(fromName)) {
+            fromName = fromName.split('<')[0];
+        }
+        if (isEmpty(fromName)) {
+            fromName = message.from;
+        }
+
+        let box = '';
+        try {
+            box = to.split('.')[1];
+        } catch (e) {
+        }
+
         let content = new TextEncoder().encode("No content");
         try {
             content = await streamToArrayBuffer(message.raw, message.rawSize);
         } catch (e) {
         }
+        //endregion
 
-        if (from && from.length > 0) {
-            let tag2 = '';
-            try {
-                tag2 = to.split('.')[2];
-            } catch (e) {
-                tag2 = '';
-            }
-            let cabloco = [];
-            if (isEmpty(tag2)) {
-                cabloco = from.filter(p => message.from === p.owner && isEmpty(p.tag2));
-            } else {
-                cabloco = from.filter(p => message.from === p.owner && tag2 === p.tag2);
-            }
+        //region Dono da Caixa
+        if (!isEmpty(box)) {
 
-            if (cabloco && cabloco.length > 0) {
-                from = cabloco;
+            let from = await new boxesService(env).owner(message.from, box);
+
+            if (from.length > 0) {
 
                 let tmp = from[0];
 
+                // TODO nao fazer isto. Parametrizar no banco
                 from = [{
                     ...tmp,
                     email: emailCopiloto,
@@ -69,7 +90,7 @@ export default {
 
                         await sendemail(env, {
                             nameFrom: p.name,
-                            from: `${p.tag}.${p.box}${!p.tag2 ? '' : ('.' + p.tag2)}`,
+                            from: `${p.tag}.${p.box}`,
                             nameTo: p.corpName,
                             to: p.email,
                             subject: message.headers.get('subject') || 'Sem assunto',
@@ -84,31 +105,28 @@ export default {
 
                 }
                 return;
+
             }
         }
+        //endregion
 
-        let persona = await new boxesService(env).whois(box);
+        //region Recebimento
+        let persona = await new boxesService(env).whois(boxOwner, box);
+        if (persona.length === 0) {
+            let ownerBox = await new boxesService(env).whoisBox(boxOwner);
+            if (ownerBox) {
+                let ownerTag = await new boxesService(env).insertUntil(ownerBox, fromName, message.from);
+                if (ownerTag) {
+                    persona = [ownerTag];
+                }
+            }
+        }
 
         if (persona && persona.length > 0) {
 
             let tmp = persona[0];
 
-            let cabloco = persona.filter(p => message.from === p.email);
-
-            if (!cabloco || cabloco.length === 0) {
-                persona = [{
-                    ...tmp,
-                    email: message.from,
-                    corpName: `${message.from.split('@')[0]} - ${tmp.corpName}`,
-                    tag2: '' + persona.length,
-                }];
-                tmp = persona[0];
-                await new boxesService(env).insert(persona[0]);
-            } else {
-                persona = cabloco;
-                tmp = cabloco[0];
-            }
-
+            // TODO nao fazer isto. Parametrizar no banco
             persona = [{
                 ...tmp,
                 nameFrom: tmp.corpName,
@@ -124,7 +142,7 @@ export default {
 
                     await sendemail(env, {
                         nameFrom: p.corpName,
-                        from: `${p.tag}.${p.box}${!p.tag2 ? '' : ('.' + p.tag2)}`,
+                        from: `${p.tag}.${p.box}`,
                         nameTo: p.name,
                         to: p.owner,
                         subject: message.headers.get('subject') || 'Sem assunto',
@@ -140,7 +158,9 @@ export default {
             }
             return;
         }
+        //endregion
 
+        //region Rejeicao
 
         let whow = "";
         try {
@@ -197,11 +217,8 @@ export default {
 
         //@ts-ignore
         await message.reply(reply);
+        //endregion
 
     },
-
-    fetch: bulk,
-    queue: mail,
-    scheduled: sched,
 
 }

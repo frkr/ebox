@@ -91,3 +91,6 @@ v=mc1 cfid=mundial.workers.dev
 - https://blog.mailchannels.com/mailchannels-enables-free-email-sending-for-cloudflare-workers-customers/
 - https://github.com/maggie-j-liu/mail
 -
+
+# Roadmap
+- Caixa para Resumo
