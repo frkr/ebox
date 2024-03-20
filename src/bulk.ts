@@ -17,7 +17,8 @@ export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
                 .split("\n")
                 .map(p => p.trim())
                 .filter(p => !isEmpty(p))
-                .map(p => p.split(":").map(p => p.trim()));
+                .filter(p => p.indexOf('@') > 0)
+                .map(p => [p.substring(0, p.lastIndexOf(' ')), p.substring(p.lastIndexOf(' '))].map(p => p.trim()));
 
             const all = (await new boxesService(env).allEmails());
             const allEmails = all.map(p => p.email);
@@ -27,13 +28,13 @@ export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
 
                 let [corpName, email] = p;
                 corpName = corpName.replaceAll(/[^a-zA-Z]/g, ' ');
-                email = email.toLowerCase().replaceAll(' ', '');
+                email = email.toLowerCase().replaceAll(/[^a-zA-Z0-9-_\\.@]/g, '');
                 email = email.toLowerCase().replaceAll('\.\.', '.');
 
                 if (allEmails.filter(p => p === email).length === 0) {
 
                     await new boxesService(env).insertEmail(corpName, email);
-                    console.log(corpName, email);
+                    console.log(corpName, '==--==', email);
 
                     allEmails.push(email);
 
