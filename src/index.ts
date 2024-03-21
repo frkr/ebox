@@ -2,7 +2,6 @@ import {createMimeMessage} from 'mimetext';
 import {EmailMessage} from "cloudflare:email";
 import boxesService from "./boxesService";
 import {isEmpty, randomHEX, streamToArrayBuffer} from "./lib/util-js/util";
-import {emailCopiloto} from "./constants";
 import {mail, sendemail} from "./sendemail";
 import {bulk} from "./bulk";
 import {sched} from "./sched";
@@ -72,16 +71,6 @@ export default {
             let from = await new boxesService(env).owner(message.from, box);
 
             if (from.length > 0) {
-
-                let tmp = from[0];
-
-                // TODO nao fazer isto. Parametrizar no banco
-                from = [{
-                    ...tmp,
-                    email: emailCopiloto,
-                    // @ts-ignore
-                }].concat(from);
-
                 for (let p of from) {
                     try {
 
@@ -129,16 +118,6 @@ export default {
         }
 
         if (persona && persona.length > 0) {
-
-            let tmp = persona[0];
-
-            // TODO nao fazer isto. Parametrizar no banco
-            persona = [{
-                ...tmp,
-                nameFrom: tmp.corpName,
-                owner: emailCopiloto,
-                // @ts-ignore
-            }].concat(persona);
 
             for (let p of persona) {
                 try {
