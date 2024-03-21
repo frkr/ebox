@@ -5,6 +5,7 @@ interface boxes {
     tag: string;
     corpName: string;
     email: string;
+    reveal: number;
 }
 
 interface emails {

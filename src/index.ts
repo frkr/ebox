@@ -149,6 +149,7 @@ export default {
                         type: message.headers.get('content-type') || 'text/plain',
                         messageid: message.headers.get("message-id") || nextId,
                         url: nextId,
+                        fromReal: p.reveal === 1 ? message.from : null,
                     });
 
                 } catch (e) {

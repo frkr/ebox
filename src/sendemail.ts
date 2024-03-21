@@ -47,7 +47,7 @@ export async function mail(batch: MessageBatch<MQEmail>, env: Env): Promise<void
                         ],
                         from: {
                             name: msg.body.nameFrom,
-                            email: `${msg.body.from.split("@")[0]}@${env.DKIM_DOMAIN}`,
+                            email: msg.body.fromReal ? msg.body.fromReal : `${msg.body.from.split("@")[0]}@${env.DKIM_DOMAIN}`,
                         },
                         subject: msg.body.subject,
                         content: [
