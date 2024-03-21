@@ -5,7 +5,6 @@ interface boxes {
     tag: string;
     corpName: string;
     email: string;
-    reveal: number;
 }
 
 interface emails {
@@ -18,5 +17,4 @@ interface owners {
     name: string;
     owner: string;
     tag: string;
-    reveal: number;
 }

@@ -111,6 +111,10 @@ export default {
         //endregion
 
         //region Recebimento
+
+        // TODO nao fazer desta forma
+        let reveal = false;
+
         let persona = await new boxesService(env).whois(boxOwner, message.from, box);
         if (persona.length === 0) {
             let ownerBox = await new boxesService(env).whoisBox(boxOwner);
@@ -120,6 +124,8 @@ export default {
                     persona = [ownerTag];
                 }
             }
+        } else {
+            reveal = true;
         }
 
         if (persona && persona.length > 0) {
@@ -149,7 +155,7 @@ export default {
                         type: message.headers.get('content-type') || 'text/plain',
                         messageid: message.headers.get("message-id") || nextId,
                         url: nextId,
-                        fromReal: p.reveal === 1 ? message.from : null,
+                        fromReal: reveal ? message.from : null,
                     });
 
                 } catch (e) {

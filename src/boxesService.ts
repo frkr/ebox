@@ -124,7 +124,7 @@ export default class {
 
                 if (!results || results.length === 0) {
                     await this.env.DB.prepare(
-                        "INSERT INTO boxes (box,owner,name,tag,corpName,email,reveal) VALUES (?,?,?,?,?,?,0)"
+                        "INSERT INTO boxes (box,owner,name,tag,corpName,email) VALUES (?,?,?,?,?,?)"
                     )
                         .bind(randTmp, abox.owner, abox.name, abox.tag, fromName, email)
                         .run()
