@@ -90,11 +90,8 @@ export async function mail(batch: MessageBatch<MQEmail>, env: Env): Promise<void
                 } catch (e) {
                 }
             }
-            if (sent) {
-                msg.ack();
-            } else {
-                msg.retry();
-            }
+            // TODO error
+            msg.ack();
         }
     }
 }

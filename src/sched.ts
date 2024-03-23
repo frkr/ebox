@@ -1,15 +1,17 @@
 import boxesService from "./boxesService";
 import {sendemail} from "./sendemail";
+import {randBox} from "./util";
 
 export async function sched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
-    const all = await new boxesService(env).next(100);
+    const all = await new boxesService(env).next(1);
 
     //TODO nao fazer isso
-    const name = 'Marcelo Mendes';
-    const box = 'marcelo';
+    const name = 'Marcelo R.';
+    const box = `marcelo.na${randBox(8)}`;
 
     for (let cabloco of all) {
+
         await sendemail(env, {
             nameFrom: name,
             from: box,

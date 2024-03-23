@@ -177,4 +177,21 @@ export default class {
         }
     }
 
+    async markErr(email: string): Promise<boolean> {
+        try {
+
+            const {results}: Record<string, any> = await this.env.DB.prepare(
+                "update emails set sent = -1 where email = ?"
+            )
+                .bind(email)
+                .run()
+
+            return true;
+
+        } catch (e) {
+            console.error(e, e.stack);
+        }
+        return false;
+    }
+
 }
