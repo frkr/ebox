@@ -18,7 +18,7 @@ binding = "ebox"
 
 [vars]
 #DKIM_PRIVATE_KEY
-DKIM_SELECTOR= "mailchannels"
+DKIM_SELECTOR= "ebox"
 DKIM_DOMAIN= "copiloto.social"
 
 [[d1_databases]]

@@ -2,14 +2,14 @@ import {createMimeMessage} from 'mimetext';
 import {EmailMessage} from "cloudflare:email";
 import boxesService from "./boxesService";
 import {isEmpty, randomHEX, streamToArrayBuffer} from "./lib/util-js/util";
-import {mail, sendemail} from "./sendemail";
+import {mailevent, sendmqemail} from "./sendmqemail";
 import {bulk} from "./bulk";
 import {sched} from "./sched";
 
 export default {
 
     fetch: bulk,
-    queue: mail,
+    queue: mailevent,
     scheduled: sched,
 
     /**
@@ -77,7 +77,7 @@ export default {
                         let nextId = await randomHEX();
                         await env.eboxr2.put(nextId + ".txt", content)
 
-                        await sendemail(env, {
+                        await sendmqemail({
                             nameFrom: p.name,
                             from: `${p.tag}.${p.box}`,
                             nameTo: p.corpName,
@@ -86,7 +86,7 @@ export default {
                             type: message.headers.get('content-type') || 'text/plain',
                             messageid: message.headers.get("message-id") || nextId,
                             url: nextId,
-                        });
+                        }, env);
 
                     } catch (e) {
                         console.error(e, e.stack);
@@ -125,7 +125,7 @@ export default {
                     let nextId = await randomHEX()
                     await env.eboxr2.put(nextId + ".txt", content);
 
-                    await sendemail(env, {
+                    await sendmqemail({
                         nameFrom: p.corpName,
                         from: `${p.tag}.${p.box}`,
                         nameTo: p.name,
@@ -135,7 +135,7 @@ export default {
                         messageid: message.headers.get("message-id") || nextId,
                         url: nextId,
                         fromReal: reveal ? message.from : null,
-                    });
+                    }, env);
 
                 } catch (e) {
                     console.error(e, e.stack);

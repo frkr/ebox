@@ -1,13 +1,18 @@
 interface MQEmail {
-    nameFrom: string;
-    from: string;
-    nameTo: string;
-    to: string;
-    subject: string;
+    nameFrom?: string;
+    from?: string;
+    nameTo?: string;
+    to?: string;
+    subject?: string;
     type?: string;
     content?: string;
     messageid?: string;
     url?: string;
     template?: boolean;
     fromReal?: string;
+}
+
+interface MQEmailResponse {
+    status?: number;
+    message?: string;
 }

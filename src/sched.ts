@@ -1,5 +1,5 @@
 import boxesService from "./boxesService";
-import {sendemail} from "./sendemail";
+import {sendmqemail} from "./sendmqemail";
 import {randBox} from "./util";
 
 export async function sched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
@@ -12,7 +12,7 @@ export async function sched(event: ScheduledController, env: Env, ctx: Execution
 
     for (let cabloco of all) {
 
-        await sendemail(env, {
+        await sendmqemail({
             nameFrom: name,
             from: box,
             nameTo: cabloco.corpName,
@@ -21,7 +21,7 @@ export async function sched(event: ScheduledController, env: Env, ctx: Execution
             type: `multipart/related; boundary="000000000000b1b6110613c457d9"`,
             url: "template",
             template: true,
-        });
+        }, env);
 
         await new boxesService(env).markSent(cabloco.email);
     }

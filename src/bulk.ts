@@ -13,12 +13,23 @@ export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
     if (request.method === "POST" && request.url.includes("/malaaao")) {
         try {
 
-            const carga = emails
-                .split("\n")
-                .map(p => p.trim())
-                .filter(p => !isEmpty(p))
-                .filter(p => p.indexOf('@') > 0)
-                .map(p => [p.substring(0, p.lastIndexOf(' ')), p.substring(p.lastIndexOf(' '))].map(p => p.trim()));
+            await sendmqemail({
+                nameFrom: "Teste",
+                from: "davi@teste.com",
+                nameTo: "Cabloco",
+                to: "davimesquita@gmail.com",
+                subject: "Vaga - Curriculo",
+                type: `multipart/related; boundary="000000000000b1b6110613c457d9"`,
+                url: "template",
+                template: true,
+            }, env);
+
+            // const carga = emails
+            //     .split("\n")
+            //     .map(p => p.trim())
+            //     .filter(p => !isEmpty(p))
+            //     .filter(p => p.indexOf('@') > 0)
+            //     .map(p => [p.substring(0, p.lastIndexOf(' ')), p.substring(p.lastIndexOf(' '))].map(p => p.trim()));
 
             const all = (await new boxesService(env).allEmails());
             const allEmails = all.map(p => p.email);
