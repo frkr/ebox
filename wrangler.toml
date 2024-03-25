@@ -6,19 +6,17 @@ account_id = "4f296275a5fa3d5c36343151790e96d3"
 
 [[queues.consumers]]
 queue = "ebox"
-#max_batch_size = 1 # optional: defaults to 10
-#max_batch_timeout = 10 # optional: defaults to 5 seconds
 
 [[queues.producers]]
 queue = "ebox"
 binding = "ebox"
 
-#[triggers]
-#crons = ["* * 7-14 * 1-5"]
+[triggers]
+crons = ["* 13-20 * * 1-5"]
 
 [vars]
 #DKIM_PRIVATE_KEY
-DKIM_SELECTOR= "ebox"
+DKIM_SELECTOR= "mailchannels"
 DKIM_DOMAIN= "copiloto.social"
 
 [[d1_databases]]

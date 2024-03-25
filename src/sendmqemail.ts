@@ -1,3 +1,5 @@
+import boxesService from "./boxesService";
+
 export async function sendmqemail(data: MQEmail, env: Env) {
     await env.ebox.send(
         data,
@@ -53,8 +55,21 @@ export async function mailevent(batch: MessageBatch<MQEmail>, env: Env): Promise
                 } catch (e) {
                 }
             }
-            // TODO error
-            msg.ack();
+            try {
+                const box = new boxesService(env);
+                if (!sent) {
+                    await box.markSent(msg.body.to, -1);
+                } else if (msg.body.auto > 5) {
+                    await box.markSent(msg.body.to, msg.body.auto + 10);
+                }
+
+            } catch (e) {
+            }
+
+            try {
+                msg.ack();
+            } catch (e) {
+            }
         }
     }
 }

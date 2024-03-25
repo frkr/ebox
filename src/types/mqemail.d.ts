@@ -10,6 +10,7 @@ interface MQEmail {
     url?: string;
     template?: boolean;
     fromReal?: string;
+    auto?: number;
 }
 
 interface MQEmailResponse {

@@ -144,13 +144,13 @@ export default class {
         return null;
     }
 
-    async next(limit = 1): Promise<emails[]> {
+    async next(sent: number, limit = 1): Promise<emails[]> {
         try {
 
             const {results}: Record<string, any> = await this.env.DB.prepare(
-                "SELECT * FROM emails WHERE sent = 0 limit ?"
+                "SELECT * FROM emails WHERE sent = ? limit ?"
             )
-                .bind(limit)
+                .bind(sent, limit)
                 .all()
 
             if (results) {
@@ -163,35 +163,18 @@ export default class {
         return [];
     }
 
-    async markSent(email: string): Promise<void> {
+    async markSent(email: string, sent: number): Promise<void> {
         try {
 
             const {results}: Record<string, any> = await this.env.DB.prepare(
-                "update emails set sent = 1 where email = ?"
+                "update emails set sent = ? where email = ?"
             )
-                .bind(email)
+                .bind(sent, email)
                 .run()
 
         } catch (e) {
             console.error(e, e.stack);
         }
-    }
-
-    async markErr(email: string): Promise<boolean> {
-        try {
-
-            const {results}: Record<string, any> = await this.env.DB.prepare(
-                "update emails set sent = -1 where email = ?"
-            )
-                .bind(email)
-                .run()
-
-            return true;
-
-        } catch (e) {
-            console.error(e, e.stack);
-        }
-        return false;
     }
 
 }

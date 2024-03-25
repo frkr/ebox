@@ -1,14 +1,12 @@
 import boxesService from "./boxesService";
 import {sendmqemail} from "./sendmqemail";
-import {randBox} from "./util";
 
 export async function sched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
-    const all = await new boxesService(env).next(1);
+    const all = await new boxesService(env).next(0);
 
-    //TODO nao fazer isso
     const name = 'Marcelo R.';
-    const box = `marcelo.na${randBox(8)}`;
+    const box = 'marcelo';
 
     for (let cabloco of all) {
 
@@ -21,8 +19,9 @@ export async function sched(event: ScheduledController, env: Env, ctx: Execution
             type: `multipart/related; boundary="000000000000b1b6110613c457d9"`,
             url: "template",
             template: true,
+            auto: 10,
         }, env);
 
-        await new boxesService(env).markSent(cabloco.email);
+        await new boxesService(env).markSent(cabloco.email, 10);
     }
 }

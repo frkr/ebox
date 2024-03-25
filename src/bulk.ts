@@ -1,5 +1,6 @@
-import {HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_UNPROCESSABLE_ENTITY, isEmpty} from "./lib/util-js/util";
+import {HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_UNPROCESSABLE_ENTITY} from "./lib/util-js/util";
 import boxesService from "./boxesService";
+import {sendmqemail} from "./sendmqemail";
 
 export const emails = `
 
@@ -10,12 +11,12 @@ export const emails = `
 
 
 export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
-    if (request.method === "POST" && request.url.includes("/malaaao")) {
+    if (request.method === "POST" && request.url.includes("/efgsdfgdsfgdsfgsdfgsdfg")) {
         try {
 
             await sendmqemail({
                 nameFrom: "Teste",
-                from: "davi@teste.com",
+                from: "davi@copiloto.social",
                 nameTo: "Cabloco",
                 to: "davimesquita@gmail.com",
                 subject: "Vaga - Curriculo",
@@ -35,24 +36,28 @@ export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
             const allEmails = all.map(p => p.email);
 
             let i = 0;
-            for (let p of carga) {
+            for (let p of emails) {
 
-                let [corpName, email] = p;
-                corpName = corpName.replaceAll(/[^a-zA-Z]/g, ' ');
-                email = email.toLowerCase().replaceAll(/[^a-zA-Z0-9-_\\.@]/g, '');
-                email = email.toLowerCase().replaceAll('\.\.', '.');
+                // let [corpName, email] = p;
+                // corpName = corpName.replaceAll(/[^a-zA-Z]/g, ' ');
+                // email = email.toLowerCase().replaceAll(/[^a-zA-Z0-9-_\\.@]/g, '');
+                // email = email.toLowerCase().replaceAll('\.\.', '.');
 
-                if (allEmails.filter(p => p === email).length === 0) {
+                if (p.email.indexOf('@') === -1) {
 
-                    await new boxesService(env).insertEmail(corpName, email);
-                    console.log(corpName, '==--==', email);
+                    console.log('Invalid email', p.email);
 
-                    allEmails.push(email);
+                } else if (allEmails.filter(v => v === p.email).length === 0) {
+
+                    await new boxesService(env).insertEmail(p.corpName, p.email);
+
+                    allEmails.push(p.email);
 
                 }
 
             }
 
+            console.log('Bulk insert done');
         } catch (e) {
             console.error(e, e.stack);
             return HTTP_INTERNAL_SERVER_ERROR();

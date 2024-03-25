@@ -6,6 +6,8 @@ import {mailevent, sendmqemail} from "./sendmqemail";
 import {bulk} from "./bulk";
 import {sched} from "./sched";
 
+const emailCopiloto = "davimesquita@gmail.com";
+
 export default {
 
     fetch: bulk,
@@ -20,7 +22,6 @@ export default {
         //region Inicio
         const to = message.to.split('@')[0];
 
-        // TODO postman é problema. Tem q avisar
         if (message.from.startsWith('postmaster@') ||
             message.to.startsWith('postmaster@') ||
             to === 'no-reply' ||
@@ -33,59 +34,126 @@ export default {
         //+++message.setReject(`550 5.1.1 Mailbox does not exist. ${env.DKIM_DOMAIN} `);
 
         const boxOwner = to.split('.')[0];
-
-        let fromName = '';
-        try {
-            fromName = message.headers.get("from");
-        } catch (e) {
-        }
-        if (isEmpty(fromName)) {
-            try {
-                fromName = message.headers.get("From");
-            } catch (e) {
-            }
-        }
-        if (!isEmpty(fromName)) {
-            fromName = fromName.split('<')[0];
-        }
-        if (isEmpty(fromName)) {
-            fromName = message.from;
-        }
-
-        let box = '';
-        try {
-            box = to.split('.')[1];
-        } catch (e) {
-        }
-
-        let content = new TextEncoder().encode("No content");
-        try {
-            content = await streamToArrayBuffer(message.raw, message.rawSize);
-        } catch (e) {
-        }
+        const owner = await new boxesService(env).whoisBox(boxOwner);
         //endregion
 
-        //region Dono da Caixa
-        if (!isEmpty(box)) {
+        if (owner) {
 
-            let from = await new boxesService(env).owner(message.from, box);
+            //region Inicio 2
+            let fromName = '';
+            try {
+                fromName = message.headers.get("from");
+            } catch (e) {
+            }
+            if (isEmpty(fromName)) {
+                try {
+                    fromName = message.headers.get("From");
+                } catch (e) {
+                }
+            }
+            if (!isEmpty(fromName)) {
+                fromName = fromName.split('<')[0];
+            }
+            if (isEmpty(fromName)) {
+                fromName = message.from;
+            }
 
-            if (from.length > 0) {
-                for (let p of from) {
+            let box = '';
+            try {
+                box = to.split('.')[1];
+            } catch (e) {
+            }
+
+            let content = new TextEncoder().encode("No content");
+            try {
+                content = await streamToArrayBuffer(message.raw, message.rawSize);
+            } catch (e) {
+            }
+            //endregion
+
+            //region Dono da Caixa
+            if (!isEmpty(box)) {
+
+                let from = await new boxesService(env).owner(message.from, box);
+
+                if (from.length > 0) {
+
+                    if (owner.copyto === 1) {
+                        from = [{
+                            ...from[0],
+                            email: emailCopiloto,
+                            // @ts-ignore
+                        }].concat(from);
+                    }
+
+                    for (let p of from) {
+                        try {
+
+                            let nextId = await randomHEX();
+                            await env.eboxr2.put(nextId + ".txt", content)
+
+                            await sendmqemail({
+                                nameFrom: p.name,
+                                from: `${p.tag}.${p.box}`,
+                                nameTo: p.corpName,
+                                to: p.email,
+                                subject: message.headers.get('subject') || 'Sem assunto',
+                                type: message.headers.get('content-type') || 'text/plain',
+                                messageid: message.headers.get("message-id") || nextId,
+                                url: nextId,
+                                fromReal: (owner && owner.reveal === 1) ? message.from : null,
+                            }, env);
+
+                        } catch (e) {
+                            console.error(e, e.stack);
+                        }
+
+                    }
+                    return;
+
+                }
+            }
+            //endregion
+
+            //region Recebimento
+            let reveal = owner.reveal === 1;
+            let persona = await new boxesService(env).whois(boxOwner, message.from, box);
+            if (persona.length === 0) {
+                if (owner) {
+                    let ownerTag = await new boxesService(env).insertUntil(owner, fromName, message.from);
+                    if (ownerTag) {
+                        persona = [ownerTag];
+                    }
+                }
+            }
+
+            if (persona && persona.length > 0) {
+
+                if (owner.copyto === 1) {
+                    persona = [{
+                        ...persona[0],
+                        nameFrom: persona[0].corpName,
+                        owner: emailCopiloto,
+                        // @ts-ignore
+                    }].concat(persona);
+                }
+
+                for (let p of persona) {
                     try {
 
-                        let nextId = await randomHEX();
-                        await env.eboxr2.put(nextId + ".txt", content)
+                        let nextId = await randomHEX()
+                        await env.eboxr2.put(nextId + ".txt", content);
 
                         await sendmqemail({
-                            nameFrom: p.name,
+                            nameFrom: p.corpName,
                             from: `${p.tag}.${p.box}`,
-                            nameTo: p.corpName,
-                            to: p.email,
+                            nameTo: p.name,
+                            to: p.owner,
                             subject: message.headers.get('subject') || 'Sem assunto',
                             type: message.headers.get('content-type') || 'text/plain',
                             messageid: message.headers.get("message-id") || nextId,
                             url: nextId,
+                            fromReal: reveal ? message.from : null,
                         }, env);
 
                     } catch (e) {
@@ -94,57 +162,10 @@ export default {
 
                 }
                 return;
-
             }
+            //endregion
+
         }
-        //endregion
-
-        //region Recebimento
-
-        // TODO nao fazer desta forma
-        let reveal = false;
-
-        let persona = await new boxesService(env).whois(boxOwner, message.from, box);
-        if (persona.length === 0) {
-            let ownerBox = await new boxesService(env).whoisBox(boxOwner);
-            if (ownerBox) {
-                let ownerTag = await new boxesService(env).insertUntil(ownerBox, fromName, message.from);
-                if (ownerTag) {
-                    persona = [ownerTag];
-                }
-            }
-        } else {
-            reveal = true;
-        }
-
-        if (persona && persona.length > 0) {
-
-            for (let p of persona) {
-                try {
-
-                    let nextId = await randomHEX()
-                    await env.eboxr2.put(nextId + ".txt", content);
-
-                    await sendmqemail({
-                        nameFrom: p.corpName,
-                        from: `${p.tag}.${p.box}`,
-                        nameTo: p.name,
-                        to: p.owner,
-                        subject: message.headers.get('subject') || 'Sem assunto',
-                        type: message.headers.get('content-type') || 'text/plain',
-                        messageid: message.headers.get("message-id") || nextId,
-                        url: nextId,
-                        fromReal: reveal ? message.from : null,
-                    }, env);
-
-                } catch (e) {
-                    console.error(e, e.stack);
-                }
-
-            }
-            return;
-        }
-        //endregion
 
         //region Rejeicao
 
