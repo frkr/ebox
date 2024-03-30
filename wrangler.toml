@@ -1,0 +1,36 @@
+name = "ebox"
+main = "src/index.ts"
+compatibility_date = "2023-11-21"
+workers_dev = true
+account_id = "4f296275a5fa3d5c36343151790e96d3"
+
+[[queues.consumers]]
+queue = "ebox"
+
+[[queues.producers]]
+queue = "ebox"
+binding = "ebox"
+
+#[triggers]
+#crons = ["* 13-20 * * 1-5"]
+
+[vars]
+#DKIM_PRIVATE_KEY
+DKIM_SELECTOR= "mailchannels"
+DKIM_DOMAIN= "copiloto.social"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "ebox"
+database_id = "7839d74b-fd86-490b-86e4-b1e99a2509c3"
+
+[[r2_buckets]]
+preview_bucket_name = "ebox"
+bucket_name = "ebox"
+binding = "eboxr2"
+
+[ai]
+binding = "AI"
+
+[placement]
+mode = "smart"
