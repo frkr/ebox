@@ -18,6 +18,7 @@ binding = "ebox"
 #DKIM_PRIVATE_KEY
 DKIM_SELECTOR= "mailchannels"
 DKIM_DOMAIN= "copiloto.social"
+TOKEN= "bloken"
 
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB

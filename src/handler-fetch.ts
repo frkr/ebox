@@ -1,9 +1,9 @@
 import {HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_UNPROCESSABLE_ENTITY} from "./lib/util-js/util";
-import boxesService from "./boxesService";
 import {sendmqemail} from "./sendmqemail";
+import boxesService from "./services/boxes-service";
 
 
-export async function bulk(request: Request, env: Env, ctx: ExecutionContext) {
+export async function handlerFetch(request: Request, env: Env, ctx: ExecutionContext) {
     if (request.method === "POST" && request.url.includes("/efgsdfgdsfgdsfgsdfgsdfg")) {
         try {
 

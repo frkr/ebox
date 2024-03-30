@@ -1,6 +1,6 @@
-import {randBox} from "./util";
+import {randBox} from "../util";
 
-export default class {
+export default class BoxesService {
     constructor(readonly env: Env) {
     }
 

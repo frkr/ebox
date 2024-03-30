@@ -8,6 +8,7 @@
     "log": "wrangler tail"
   },
   "dependencies": {
+    "hono": "4.1.x",
     "mimetext": "3.0.16"
   },
   "devDependencies": {

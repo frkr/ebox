@@ -1,0 +1,6 @@
+POST https://ebox.casacasa.workers.dev/mail
+Authorization: Bearer bloken
+Content-Type: application/json
+Accept: application/json
+
+{}

@@ -1,7 +1,7 @@
-import boxesService from "./boxesService";
 import {sendmqemail} from "./sendmqemail";
+import boxesService from "./services/boxes-service";
 
-export async function sched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
+export async function handlerSched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
     const all = await new boxesService(env).next(0, 10000);
 

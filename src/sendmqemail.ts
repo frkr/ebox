@@ -1,4 +1,4 @@
-import boxesService from "./boxesService";
+import boxesService from "./services/boxes-service";
 
 export async function sendmqemail(data: MQEmail, env: Env) {
     await env.ebox.send(
