@@ -9,7 +9,7 @@ interface MQEmail {
     messageid?: string;
     url?: string;
     template?: boolean;
-    fromReal?: string;
+    replyTo?: string;
     auto?: number;
 }
 

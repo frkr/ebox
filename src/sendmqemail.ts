@@ -96,9 +96,9 @@ export async function mailchannel(emailFromFinal: string, content: string, msg: 
                             email: msg.body.to,
                         },
                     ],
-                    reply_to: msg.body.fromReal ? {
+                    reply_to: msg.body.replyTo ? {
                         name: msg.body.nameFrom,
-                        email: msg.body.fromReal,
+                        email: msg.body.replyTo,
                     } : null,
                     dkim_domain: env.DKIM_DOMAIN,
                     dkim_selector: env.DKIM_SELECTOR,

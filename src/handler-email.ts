@@ -90,7 +90,7 @@ export default async function handlerEmail(message: ForwardableEmailMessage, env
                             type: message.headers.get('content-type') || 'text/plain',
                             messageid: message.headers.get("message-id") || nextId,
                             url: nextId,
-                            fromReal: (owner && owner.reveal === 1) ? message.from : null,
+                            replyTo: (owner && owner.reveal === 1) ? message.from : null,
                         }, env);
 
                     } catch (e) {
@@ -142,7 +142,7 @@ export default async function handlerEmail(message: ForwardableEmailMessage, env
                         type: message.headers.get('content-type') || 'text/plain',
                         messageid: message.headers.get("message-id") || nextId,
                         url: nextId,
-                        fromReal: reveal ? message.from : null,
+                        replyTo: reveal ? message.from : null,
                     }, env);
 
                 } catch (e) {
