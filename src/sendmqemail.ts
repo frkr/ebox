@@ -9,7 +9,7 @@ export async function sendmqemail(data: MQEmail, env: Env) {
     );
 }
 
-export async function mailevent(batch: MessageBatch<MQEmail>, env: Env): Promise<void> {
+export async function handlerQueue(batch: MessageBatch<MQEmail>, env: Env): Promise<void> {
     for (let msg of batch.messages) {
         let sent = false;
         let blocked = false;

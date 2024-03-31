@@ -1,66 +1,48 @@
-import {HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR, HTTP_UNPROCESSABLE_ENTITY} from "./lib/util-js/util";
-import {sendmqemail} from "./sendmqemail";
+import {HTTP_INTERNAL_SERVER_ERROR} from "./lib/util-js/util";
 import boxesService from "./services/boxes-service";
 
+export const emails = `
 
-export async function handlerFetch(request: Request, env: Env, ctx: ExecutionContext) {
-    if (request.method === "POST" && request.url.includes("/efgsdfgdsfgdsfgsdfgsdfg")) {
-        try {
+`
 
-            await sendmqemail({
-                nameFrom: "Teste",
-                from: "davi@copiloto.social",
-                nameTo: "Cabloco",
-                to: "davi.m.esquita@gmail.com",
-                subject: "Vaga - Curriculo",
-                type: `multipart/related; boundary="000000000000b1b6110613c457d9"`,
-                url: "template",
-                template: true,
-            }, env);
+export async function handlerFetch(env: Env) {
+    try {
 
-            // const carga = emails
-            //     .split("\n")
-            //     .map(p => p.trim())
-            //     .filter(p => !isEmpty(p))
-            //     .filter(p => p.indexOf('@') > 0)
-            //     .map(p => [p.substring(0, p.lastIndexOf(' ')), p.substring(p.lastIndexOf(' '))].map(p => p.trim()));
+        const carga = emails
+            .split("\n")
+            .filter(p => p.indexOf('@') > 0)
+            .map(p => p.split(',')
+                .filter(a => a.indexOf('@') > 0)
+                .map(a => a.trim())[0]
+            );
 
-            const all = (await new boxesService(env).allEmails());
-            const allEmails = all.map(p => p.email);
+        const all = (await new boxesService(env).allEmails());
+        const allEmails = all.map(p => p.email);
 
-            let i = 0;
-            for (let p of emails) {
+        for (let p of carga) {
 
-                // let [corpName, email] = p;
-                // corpName = corpName.replaceAll(/[^a-zA-Z]/g, ' ');
-                // email = email.toLowerCase().replaceAll(/[^a-zA-Z0-9-_\\.@]/g, '');
-                // email = email.toLowerCase().replaceAll('\.\.', '.');
+            // let [corpName, email] = p;
+            // corpName = corpName.replaceAll(/[^a-zA-Z]/g, ' ');
+            // email = email.toLowerCase().replaceAll(/[^a-zA-Z0-9-_\\.@]/g, '');
+            // email = email.toLowerCase().replaceAll('\.\.', '.');
 
-                if (p.email.indexOf('@') === -1) {
+            if (p.indexOf('@') === -1) {
 
-                    console.log('Invalid email', p.email);
+                console.log('Invalid email', p);
 
-                } else if (allEmails.filter(v => v === p.email).length === 0) {
+            } else if (allEmails.filter(v => v === p).length === 0) {
 
-                    await new boxesService(env).insertEmail(p.corpName, p.email);
+                await new boxesService(env).insertEmail(p, p);
 
-                    allEmails.push(p.email);
-
-                }
+                allEmails.push(p);
 
             }
 
-            console.log('Bulk insert done');
-        } catch (e) {
-            console.error(e, e.stack);
-            return HTTP_INTERNAL_SERVER_ERROR();
         }
 
-        return HTTP_CREATED();
-    } else {
-
-        // XXX Atack protection
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        return HTTP_UNPROCESSABLE_ENTITY();
+        console.log('Bulk insert done');
+    } catch (e) {
+        console.error(e, e.stack);
+        return HTTP_INTERNAL_SERVER_ERROR();
     }
 }

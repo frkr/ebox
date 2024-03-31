@@ -86,7 +86,7 @@ _mailchannels
 ```
 
 ```text
-v=mc1 cfid=casacasa.workers.dev
+v=mc1 cfid=casaninja.workers.dev
 ```
 
 # Links

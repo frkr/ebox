@@ -1,5 +1,8 @@
 import {Context, Hono} from "hono";
 import {bearerAuth} from 'hono/bearer-auth'
+import {sendmqemail} from "../sendmqemail";
+import {randomHEX, shuffle} from "../lib/util-js/util";
+import {template} from "../util";
 
 export function honoRouter(app: Hono, configs: Env) {
     app.use('/*', bearerAuth({
@@ -18,21 +21,24 @@ export function honoRouter(app: Hono, configs: Env) {
 
         console.log("Estágio 1", new Date())
         try {
-            console.log(
-                await mailto("davi@copiloto.ninja", "Teste do dedeno", {
-                        nameFrom: "Deno local",
-                        to: "davimesquita@gmail.com",
-                        nameTo: "Teste Gmail",
-                        subject: "Vaga - Curriculo",
-                    }
-                )
-            )
+            await sendmqemail({
+                nameFrom: 'Davi',
+                from: 'davi',
+                nameTo: "Marcelo",
+                replyTo: "davimesquita@gmail.com",
+                to: "davimesquita@gmail.com",
+                subject: shuffle(["Vaga", "Curriculo"]).join(" - "),
+                messageid: await randomHEX(16),
+                content: template,
+            } as MQEmail, c.env);
+
+            // await handlerFetch(c.env);
         } catch (e) {
             console.error(e, e.stack)
         }
 
         console.log("Estágio 2", new Date())
 
-        return c.text(configs.DKIM_SELECTOR)
+        return c.text("Estágio 3")
     })
 }

@@ -11,14 +11,14 @@ queue = "ebox"
 queue = "ebox"
 binding = "ebox"
 
-#[triggers]
-#crons = ["* 13-20 * * 1-5"]
+[triggers]
+crons = ["* 13-20 * * 1-5"]
 
 [vars]
 #DKIM_PRIVATE_KEY
 DKIM_SELECTOR= "mailchannels"
-DKIM_DOMAIN= "copiloto.social"
-TOKEN= "bloken"
+DKIM_DOMAIN= "copiloto.ninja"
+TOKEN= ""
 
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB

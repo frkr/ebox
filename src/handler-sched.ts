@@ -3,6 +3,7 @@ import boxesService from "./services/boxes-service";
 
 export async function handlerSched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
+    return;
     const all = await new boxesService(env).next(0, 10000);
 
     const name = 'Marcelo R.';
