@@ -12,7 +12,6 @@ export async function sendmqemail(data: MQEmail, env: Env) {
 export async function handlerQueue(batch: MessageBatch<MQEmail>, env: Env): Promise<void> {
     for (let msg of batch.messages) {
         let sent = false;
-        let blocked = false;
         try {
             let content = msg.body.content;
 
@@ -39,8 +38,6 @@ export async function handlerQueue(batch: MessageBatch<MQEmail>, env: Env): Prom
 
                     let respContent = resp.status + "\n\n" + resp.message;
 
-                    blocked = respContent.indexOf("550 5.7.1 [ESA]") !== -1;
-
                     console.error(`Email failed to send: ${emailFromFinal} - ${msg.body.to}: ${msg.body.subject}`);
                     console.error(respContent);
                 }
@@ -61,11 +58,7 @@ export async function handlerQueue(batch: MessageBatch<MQEmail>, env: Env): Prom
             try {
                 const box = new boxesService(env);
                 if (!sent) {
-                    if (blocked) {
-                        await box.markSent(msg.body.to, -2);
-                    } else {
-                        await box.markSent(msg.body.to, -1);
-                    }
+                    await box.markSent(msg.body.to, -1);
                 } else if (msg.body.auto > 5) {
                     await box.markSent(msg.body.to, msg.body.auto + 10);
                 }

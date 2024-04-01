@@ -1,27 +1,26 @@
 import {sendmqemail} from "./sendmqemail";
 import boxesService from "./services/boxes-service";
+import {getRandomInt, randomHEX, shuffle} from "./lib/util-js/util";
+import {randBox, template} from "./util";
 
 export async function handlerSched(event: ScheduledController, env: Env, ctx: ExecutionContext) {
 
-    return;
-    const all = await new boxesService(env).next(0, 10000);
-
-    const name = 'Marcelo R.';
-    const box = 'marcelo';
+    // return;
+    const all = await new boxesService(env).next(0, getRandomInt(10, 100));
 
     for (let cabloco of all) {
 
         await sendmqemail({
-            nameFrom: name,
-            from: box,
+            nameFrom: `${shuffle(["Marcelo", "Mendes", "M."])[0]}, ${shuffle(["Romero", "R", "Mendes", "M"])[0]}`,
+            from: 'marcelo.' + randBox(8),
             nameTo: cabloco.corpName,
+            replyTo: "marcelo.mendes@taking.com.br",
             to: cabloco.email,
-            subject: "Vaga - Curriculo",
-            type: `multipart/related; boundary="000000000000b1b6110613c457d9"`,
-            url: "template",
-            template: true,
+            subject: shuffle(["Vaga", "Curriculo"]).join(" - "),
+            messageid: await randomHEX(16),
+            content: template,
             auto: 10,
-        }, env);
+        } as MQEmail, env);
 
         await new boxesService(env).markSent(cabloco.email, 10);
     }
